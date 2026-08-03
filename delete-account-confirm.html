@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Confirm Account Deletion — Arch N Line</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blueprint: #1E3A5F;
+    --blueprint-deep: #14293F;
+    --ink: #14213D;
+    --muted: #5B6B82;
+    --line: rgba(30, 58, 95, 0.14);
+    --panel: #ffffff;
+    --danger: #B3261E;
+    --danger-deep: #8f1e18;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--ink);
+    background-color: #F6F8FA;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 28px 28px;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .card {
+    width: 100%;
+    max-width: 460px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    box-shadow: 0 12px 32px rgba(20, 41, 63, 0.10);
+    overflow: hidden;
+  }
+  .header {
+    background: var(--blueprint);
+    color: #fff;
+    padding: 22px 28px;
+    position: relative;
+  }
+  .header::after {
+    content: "";
+    position: absolute;
+    left: 28px;
+    bottom: 0;
+    width: 36px;
+    height: 3px;
+    background: #fff;
+    opacity: 0.6;
+  }
+  .eyebrow {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    opacity: 0.75;
+    margin: 0 0 4px;
+  }
+  .header h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+  }
+  .body { padding: 28px; }
+  .body p { color: var(--muted); font-size: 14.5px; line-height: 1.6; margin: 0 0 16px; }
+  .email-chip {
+    display: inline-block;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    color: var(--ink);
+    background: #EAF1F8;
+    padding: 3px 10px;
+    border-radius: 3px;
+    font-size: 14px;
+  }
+  .checkbox-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin: 20px 0;
+    padding: 14px;
+    background: #FBEAE9;
+    border: 1px solid rgba(179,38,30,0.2);
+    border-radius: 3px;
+  }
+  .checkbox-row input { margin-top: 3px; }
+  .checkbox-row label { font-size: 13.5px; line-height: 1.5; color: var(--danger-deep); }
+  button {
+    width: 100%;
+    padding: 13px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    color: #fff;
+    background: var(--danger);
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+  button:hover:not(:disabled) { background: var(--danger-deep); }
+  button:disabled { opacity: 0.5; cursor: default; }
+  #loading, #confirm, #result, #error { display: none; }
+  .spinner-text { font-size: 14.5px; color: var(--muted); text-align: center; padding: 8px 0; }
+  .result-icon { font-size: 32px; text-align: center; margin-bottom: 8px; }
+  a.back-link { color: var(--blueprint); font-size: 14px; }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="header">
+    <p class="eyebrow">Arch N Line</p>
+    <h1>Confirm account deletion</h1>
+  </div>
+  <div class="body">
+
+    <div id="loading">
+      <p class="spinner-text">Verifying your link…</p>
+    </div>
+
+    <div id="confirm">
+      <p>Signed in as <span class="email-chip" id="email-label"></span></p>
+      <p>This permanently deletes your account, your saved projects, and your cloud backup. This cannot be undone.</p>
+      <div class="checkbox-row">
+        <input type="checkbox" id="confirm-check">
+        <label for="confirm-check">I understand this will permanently delete my account and all of my data.</label>
+      </div>
+      <button id="delete-btn" disabled>Permanently delete my account</button>
+    </div>
+
+    <div id="result">
+      <div class="result-icon">✓</div>
+      <p style="text-align:center; color: var(--ink); font-weight: 600;">Your account has been deleted.</p>
+      <p style="text-align:center;">You can close this page. Thanks for trying Arch N Line.</p>
+    </div>
+
+    <div id="error">
+      <p>This link is invalid or has expired. Deletion links are valid for 1 hour and can only be used once.</p>
+      <a class="back-link" href="delete-account.html">← Request a new deletion link</a>
+    </div>
+
+  </div>
+</div>
+
+<script type="module">
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
+  // ── CONFIGURE THESE TWO VALUES (same as delete-account.html) ───────────
+  const SUPABASE_URL = 'YOUR_SUPABASE_PROJECT_URL'
+  const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'
+  // ─────────────────────────────────────────────────────────────────────
+
+  const DELETE_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/delete-account`
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+  const loadingEl = document.getElementById('loading')
+  const confirmEl = document.getElementById('confirm')
+  const resultEl = document.getElementById('result')
+  const errorEl = document.getElementById('error')
+  const emailLabel = document.getElementById('email-label')
+  const checkbox = document.getElementById('confirm-check')
+  const deleteBtn = document.getElementById('delete-btn')
+
+  loadingEl.style.display = 'block'
+
+  checkbox.addEventListener('change', () => {
+    deleteBtn.disabled = !checkbox.checked
+  })
+
+  async function init() {
+    // supabase-js automatically parses the magic-link tokens from the URL
+    // and establishes a session on load.
+    const { data: { session } } = await supabase.auth.getSession()
+
+    loadingEl.style.display = 'none'
+
+    if (!session) {
+      errorEl.style.display = 'block'
+      return
+    }
+
+    emailLabel.textContent = session.user.email
+    confirmEl.style.display = 'block'
+  }
+
+  deleteBtn.addEventListener('click', async () => {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) {
+      confirmEl.style.display = 'none'
+      errorEl.style.display = 'block'
+      return
+    }
+
+    deleteBtn.disabled = true
+    deleteBtn.textContent = 'Deleting…'
+
+    try {
+      const res = await fetch(DELETE_FUNCTION_URL, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+      })
+      const body = await res.json()
+      if (!res.ok) throw new Error(body.error || 'Deletion failed')
+
+      confirmEl.style.display = 'none'
+      resultEl.style.display = 'block'
+      await supabase.auth.signOut()
+    } catch (err) {
+      deleteBtn.disabled = false
+      deleteBtn.textContent = 'Permanently delete my account'
+      alert('Something went wrong deleting your account. Please contact musanaali02@gmail.com and we\'ll handle it manually.')
+    }
+  })
+
+  init()
+</script>
+
+</body>
+</html>

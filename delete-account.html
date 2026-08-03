@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Delete Your Arch N Line Account</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blueprint: #1E3A5F;
+    --blueprint-deep: #14293F;
+    --ink: #14213D;
+    --muted: #5B6B82;
+    --line: rgba(30, 58, 95, 0.14);
+    --panel: #ffffff;
+    --danger: #B3261E;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--ink);
+    background-color: #F6F8FA;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 28px 28px;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .card {
+    width: 100%;
+    max-width: 460px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    box-shadow: 0 12px 32px rgba(20, 41, 63, 0.10);
+    overflow: hidden;
+  }
+  .header {
+    background: var(--blueprint);
+    color: #fff;
+    padding: 22px 28px;
+    position: relative;
+  }
+  .header::after {
+    content: "";
+    position: absolute;
+    left: 28px;
+    bottom: 0;
+    width: 36px;
+    height: 3px;
+    background: #fff;
+    opacity: 0.6;
+  }
+  .eyebrow {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    opacity: 0.75;
+    margin: 0 0 4px;
+  }
+  .header h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+  }
+  .body { padding: 28px; }
+  .body p { color: var(--muted); font-size: 14.5px; line-height: 1.6; margin: 0 0 20px; }
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  input[type="email"] {
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 15px;
+    font-family: inherit;
+    border: 1px solid #cdd6e0;
+    border-radius: 3px;
+    margin-bottom: 18px;
+  }
+  input[type="email"]:focus {
+    outline: 2px solid var(--blueprint);
+    outline-offset: 1px;
+    border-color: var(--blueprint);
+  }
+  button {
+    width: 100%;
+    padding: 13px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    color: #fff;
+    background: var(--blueprint);
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+  button:hover:not(:disabled) { background: var(--blueprint-deep); }
+  button:disabled { opacity: 0.6; cursor: default; }
+  .status {
+    margin-top: 18px;
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 12px 14px;
+    border-radius: 3px;
+    display: none;
+  }
+  .status.success { display: block; background: #EAF1F8; color: var(--blueprint-deep); border: 1px solid var(--line); }
+  .status.error { display: block; background: #FBEAE9; color: var(--danger); border: 1px solid rgba(179,38,30,0.2); }
+  .fineprint { font-size: 12.5px; color: var(--muted); margin-top: 22px; line-height: 1.6; }
+  .fineprint a { color: var(--blueprint); }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="header">
+    <p class="eyebrow">Arch N Line</p>
+    <h1>Delete your account</h1>
+  </div>
+  <div class="body">
+    <p>Enter the email address on your Arch N Line account. We'll send you a link to confirm and permanently delete your account and project data.</p>
+
+    <form id="delete-form">
+      <label for="email">Account email</label>
+      <input type="email" id="email" name="email" placeholder="you@example.com" required>
+      <button type="submit" id="submit-btn">Send deletion link</button>
+    </form>
+
+    <div class="status" id="status"></div>
+
+    <p class="fineprint">
+      This permanently deletes your account, your saved projects, and your cloud backup. This cannot be undone. Local content on a device where the app is installed is removed when you delete the app or clear its data.
+      <br><br>
+      Questions? Contact <a href="mailto:musanaali02@gmail.com">musanaali02@gmail.com</a>.
+    </p>
+  </div>
+</div>
+
+<script type="module">
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
+  // ── CONFIGURE THESE TWO VALUES ──────────────────────────────────────────
+  // Find them in your Supabase dashboard: Settings → API
+  const SUPABASE_URL = 'YOUR_SUPABASE_PROJECT_URL'      // e.g. https://xxxxxxxx.supabase.co
+  const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'    // the "anon public" key, safe to expose client-side
+
+  // Update this once you know the final hosted URL of delete-account-confirm.html
+  const REDIRECT_URL = 'https://YOUR_USERNAME.github.io/YOUR_REPO/delete-account-confirm.html'
+  // ─────────────────────────────────────────────────────────────────────
+
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+  const form = document.getElementById('delete-form')
+  const emailInput = document.getElementById('email')
+  const statusEl = document.getElementById('status')
+  const submitBtn = document.getElementById('submit-btn')
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault()
+    const email = emailInput.value.trim()
+    if (!email) return
+
+    submitBtn.disabled = true
+    submitBtn.textContent = 'Sending…'
+    statusEl.className = 'status'
+
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: REDIRECT_URL,
+        shouldCreateUser: false,
+      },
+    })
+
+    if (error) {
+      statusEl.textContent = "We couldn't send the link. Double-check the email and try again."
+      statusEl.className = 'status error'
+      submitBtn.disabled = false
+      submitBtn.textContent = 'Send deletion link'
+    } else {
+      form.style.display = 'none'
+      statusEl.textContent = `We've sent a deletion link to ${email}. Open it on this device to confirm — it expires in 1 hour.`
+      statusEl.className = 'status success'
+    }
+  })
+</script>
+
+</body>
+</html>
