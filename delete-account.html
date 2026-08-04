@@ -14,7 +14,6 @@
     --muted: #5B6B82;
     --line: rgba(30, 58, 95, 0.14);
     --panel: #ffffff;
-    --danger: #B3261E;
   }
   * { box-sizing: border-box; }
   body {
@@ -34,7 +33,7 @@
   }
   .card {
     width: 100%;
-    max-width: 460px;
+    max-width: 480px;
     background: var(--panel);
     border: 1px solid var(--line);
     border-radius: 4px;
@@ -72,29 +71,26 @@
     margin: 0;
   }
   .body { padding: 28px; }
-  .body p { color: var(--muted); font-size: 14.5px; line-height: 1.6; margin: 0 0 20px; }
-  label {
-    display: block;
-    font-size: 13px;
+  .body p { color: var(--muted); font-size: 14.5px; line-height: 1.6; margin: 0 0 18px; }
+  h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
     font-weight: 600;
-    margin-bottom: 6px;
+    color: var(--ink);
+    margin: 24px 0 10px;
   }
-  input[type="email"] {
+  ol, ul {
+    margin: 0 0 18px;
+    padding-left: 20px;
+    color: var(--muted);
+    font-size: 14.5px;
+    line-height: 1.7;
+  }
+  ol li, ul li { margin-bottom: 4px; }
+  .email-btn {
+    display: block;
     width: 100%;
-    padding: 12px 14px;
-    font-size: 15px;
-    font-family: inherit;
-    border: 1px solid #cdd6e0;
-    border-radius: 3px;
-    margin-bottom: 18px;
-  }
-  input[type="email"]:focus {
-    outline: 2px solid var(--blueprint);
-    outline-offset: 1px;
-    border-color: var(--blueprint);
-  }
-  button {
-    width: 100%;
+    text-align: center;
     padding: 13px;
     font-family: 'Space Grotesk', sans-serif;
     font-size: 14px;
@@ -104,22 +100,20 @@
     background: var(--blueprint);
     border: none;
     border-radius: 3px;
-    cursor: pointer;
+    text-decoration: none;
+    margin: 4px 0 22px;
   }
-  button:hover:not(:disabled) { background: var(--blueprint-deep); }
-  button:disabled { opacity: 0.6; cursor: default; }
-  .status {
-    margin-top: 18px;
-    font-size: 14px;
-    line-height: 1.6;
-    padding: 12px 14px;
+  .email-btn:hover { background: var(--blueprint-deep); }
+  .info-box {
+    background: #EAF1F8;
+    border: 1px solid var(--line);
     border-radius: 3px;
-    display: none;
+    padding: 14px 16px;
+    font-size: 13.5px;
+    color: var(--blueprint-deep);
+    line-height: 1.6;
   }
-  .status.success { display: block; background: #EAF1F8; color: var(--blueprint-deep); border: 1px solid var(--line); }
-  .status.error { display: block; background: #FBEAE9; color: var(--danger); border: 1px solid rgba(179,38,30,0.2); }
-  .fineprint { font-size: 12.5px; color: var(--muted); margin-top: 22px; line-height: 1.6; }
-  .fineprint a { color: var(--blueprint); }
+  .fineprint { font-size: 12.5px; color: var(--muted); margin-top: 20px; line-height: 1.6; }
 </style>
 </head>
 <body>
@@ -130,72 +124,36 @@
     <h1>Delete your account</h1>
   </div>
   <div class="body">
-    <p>Enter the email address on your Arch N Line account. We'll send you a link to confirm and permanently delete your account and project data.</p>
 
-    <form id="delete-form">
-      <label for="email">Account email</label>
-      <input type="email" id="email" name="email" placeholder="you@example.com" required>
-      <button type="submit" id="submit-btn">Send deletion link</button>
-    </form>
+    <p>To delete your Arch N Line account and all associated data, send us an email request. We review and process every request manually to make sure deletions are safe and intentional.</p>
 
-    <div class="status" id="status"></div>
+    <h2>How to request deletion</h2>
+    <ol>
+      <li>Email us at <strong>musanaali02@gmail.com</strong> from the address associated with your Arch N Line account (or include that email in your message).</li>
+      <li>Use the subject line <strong>"Delete My Account."</strong></li>
+      <li>We'll verify the request and confirm by email once it's been processed.</li>
+    </ol>
+
+    <a class="email-btn" href="mailto:musanaali02@gmail.com?subject=Delete%20My%20Account&body=Please%20delete%20my%20Arch%20N%20Line%20account%20and%20associated%20data.%0A%0AAccount%20email%3A%20">
+      Email us to delete my account
+    </a>
+
+    <h2>What gets deleted</h2>
+    <ul>
+      <li>Your account details (email, display name, avatar)</li>
+      <li>All projects, pages, layers, drawings, room scans, and custom symbols in your cloud backup</li>
+      <li>Your subscription/entitlement record</li>
+    </ul>
+
+    <div class="info-box">
+      We process deletion requests within <strong>30 days</strong>. Content stored locally on your device is under your control at all times and is removed when you delete the app or clear its data — you don't need to wait for us for that part.
+    </div>
 
     <p class="fineprint">
-      This permanently deletes your account, your saved projects, and your cloud backup. This cannot be undone. Local content on a device where the app is installed is removed when you delete the app or clear its data.
-      <br><br>
-      Questions? Contact <a href="mailto:musanaali02@gmail.com">musanaali02@gmail.com</a>.
+      Questions about this process? Reach us any time at <a href="mailto:musanaali02@gmail.com" style="color: var(--blueprint);">musanaali02@gmail.com</a>.
     </p>
   </div>
 </div>
-
-<script type="module">
-  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-
-  // ── CONFIGURE THESE TWO VALUES ──────────────────────────────────────────
-  // Find them in your Supabase dashboard: Settings → API
-  const SUPABASE_URL = 'YOUR_SUPABASE_PROJECT_URL'      // e.g. https://xxxxxxxx.supabase.co
-  const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'    // the "anon public" key, safe to expose client-side
-
-  // Update this once you know the final hosted URL of delete-account-confirm.html
-  const REDIRECT_URL = 'https://YOUR_USERNAME.github.io/YOUR_REPO/delete-account-confirm.html'
-  // ─────────────────────────────────────────────────────────────────────
-
-  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-
-  const form = document.getElementById('delete-form')
-  const emailInput = document.getElementById('email')
-  const statusEl = document.getElementById('status')
-  const submitBtn = document.getElementById('submit-btn')
-
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault()
-    const email = emailInput.value.trim()
-    if (!email) return
-
-    submitBtn.disabled = true
-    submitBtn.textContent = 'Sending…'
-    statusEl.className = 'status'
-
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo: REDIRECT_URL,
-        shouldCreateUser: false,
-      },
-    })
-
-    if (error) {
-      statusEl.textContent = "We couldn't send the link. Double-check the email and try again."
-      statusEl.className = 'status error'
-      submitBtn.disabled = false
-      submitBtn.textContent = 'Send deletion link'
-    } else {
-      form.style.display = 'none'
-      statusEl.textContent = `We've sent a deletion link to ${email}. Open it on this device to confirm — it expires in 1 hour.`
-      statusEl.className = 'status success'
-    }
-  })
-</script>
 
 </body>
 </html>
